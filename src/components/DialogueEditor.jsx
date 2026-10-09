@@ -1,16 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Users, Sparkles, MessageSquare } from 'lucide-react';
-import { DialogueTurn, VoiceInfo } from '../types/voice';
-
-interface DialogueEditorProps {
-  dialogueTurns: DialogueTurn[];
-  onChangeTurns: (turns: DialogueTurn[]) => void;
-  voices: VoiceInfo[];
-  speaker1Voice: string;
-  speaker2Voice: string;
-  onChangeSpeaker1Voice: (v: string) => void;
-  onChangeSpeaker2Voice: (v: string) => void;
-}
+import { Plus, Trash2, Users } from 'lucide-react';
 
 export function DialogueEditor({
   dialogueTurns,
@@ -20,12 +9,12 @@ export function DialogueEditor({
   speaker2Voice,
   onChangeSpeaker1Voice,
   onChangeSpeaker2Voice
-}: DialogueEditorProps) {
+}) {
   const [speaker1Name, setSpeaker1Name] = useState('Alex');
   const [speaker2Name, setSpeaker2Name] = useState('Sam');
 
-  const addLine = (speaker: string) => {
-    const newTurn: DialogueTurn = {
+  const addLine = (speaker) => {
+    const newTurn = {
       id: Math.random().toString(36).substring(7),
       speaker,
       text: '',
@@ -34,18 +23,18 @@ export function DialogueEditor({
     onChangeTurns([...dialogueTurns, newTurn]);
   };
 
-  const updateLine = (id: string, updates: Partial<DialogueTurn>) => {
+  const updateLine = (id, updates) => {
     onChangeTurns(
       dialogueTurns.map((turn) => (turn.id === id ? { ...turn, ...updates } : turn))
     );
   };
 
-  const removeLine = (id: string) => {
+  const removeLine = (id) => {
     if (dialogueTurns.length <= 1) return;
     onChangeTurns(dialogueTurns.filter((turn) => turn.id !== id));
   };
 
-  const loadPresetDialogue = (type: 'podcast' | 'interview') => {
+  const loadPresetDialogue = (type) => {
     if (type === 'podcast') {
       setSpeaker1Name('Alex');
       setSpeaker2Name('Sam');
@@ -95,7 +84,6 @@ export function DialogueEditor({
 
   return (
     <div className="space-y-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
-      {/* Dialogue Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-indigo-400" />
@@ -121,7 +109,6 @@ export function DialogueEditor({
         </div>
       </div>
 
-      {/* Speaker Voices Configuration */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -172,9 +159,8 @@ export function DialogueEditor({
         </div>
       </div>
 
-      {/* Dialogue Lines */}
       <div className="space-y-2.5">
-        {dialogueTurns.map((turn, index) => {
+        {dialogueTurns.map((turn) => {
           const isSpeaker1 = turn.speaker === speaker1Name;
           return (
             <div
@@ -227,7 +213,6 @@ export function DialogueEditor({
         })}
       </div>
 
-      {/* Add Line Buttons */}
       <div className="flex items-center gap-2">
         <button
           type="button"

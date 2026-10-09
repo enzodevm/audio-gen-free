@@ -1,22 +1,12 @@
-import { useState } from 'react';
-import { Sliders, Sparkles, X, Wand2 } from 'lucide-react';
-import { STYLE_PRESETS } from '../constants/presets';
-
-interface StyleSelectorProps {
-  style: string;
-  onChangeStyle: (style: string) => void;
-  selectedModel: string;
-  onChangeModel: (model: string) => void;
-}
+import { Sliders, X, Wand2 } from 'lucide-react';
+import { STYLE_PRESETS } from '../constants/presets.js';
 
 export function StyleSelector({
   style,
   onChangeStyle,
   selectedModel,
   onChangeModel
-}: StyleSelectorProps) {
-  const [isOpenCustom, setIsOpenCustom] = useState(false);
-
+}) {
   return (
     <div className="space-y-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">

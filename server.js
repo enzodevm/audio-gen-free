@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -39,7 +39,7 @@ const PREBUILT_VOICES = [
     tone: 'Warm, Balanced & Clear',
     description: 'Natural, friendly, and articulate. Perfect for audiobooks, explainers, tutorials, and storytelling.',
     accent: 'Neutral English',
-    color: '#ec4899', // pink
+    color: '#ec4899',
     suggestedStyles: ['Warm, reassuring narrator', 'Professional educator', 'Gentle meditation guide'],
     previewSample: 'Welcome to Gemini Voice Studio. I can speak any text you write with clarity and warmth.'
   },
@@ -50,7 +50,7 @@ const PREBUILT_VOICES = [
     tone: 'Energetic, Vibrant & Upbeat',
     description: 'Youthful, bright, dynamic, and engaging. Great for YouTube videos, commercials, gaming, and lively podcasts.',
     accent: 'Modern English',
-    color: '#f97316', // orange
+    color: '#f97316',
     suggestedStyles: ['High-energy radio host', 'Excited video game character', 'Punchy promo announcer'],
     previewSample: 'Hey everyone, check this out! Puck brings maximum energy and punch to every single line.'
   },
@@ -61,7 +61,7 @@ const PREBUILT_VOICES = [
     tone: 'Deep, Resonant & Authoritative',
     description: 'Commanding baritone with cinematic gravitas. Ideal for blockbuster movie trailers, history docs, and epic announcements.',
     accent: 'Deep Cinematic English',
-    color: '#8b5cf6', // purple
+    color: '#8b5cf6',
     suggestedStyles: ['Dramatic movie trailer voice', 'Epic myth narrator', 'Authoritative news broadcast'],
     previewSample: 'In a world of infinite sound, Fenrir brings power, depth, and cinematic authority.'
   },
@@ -72,7 +72,7 @@ const PREBUILT_VOICES = [
     tone: 'Calm, Soothing & Serene',
     description: 'Soft-spoken, peaceful, and gentle. Excellent for mindfulness, ASMR-style guides, bedtime stories, and relaxed tech demos.',
     accent: 'Smooth Gentle English',
-    color: '#06b6d4', // cyan
+    color: '#06b6d4',
     suggestedStyles: ['Gentle mindfulness guide', 'Late-night cozy radio', 'Patient software tutor'],
     previewSample: 'Take a deep breath. With Zephyr, words flow smoothly like a tranquil evening breeze.'
   },
@@ -83,7 +83,7 @@ const PREBUILT_VOICES = [
     tone: 'Gravelly, Mature & Thoughtful',
     description: 'Rich, textured, and reflective voice with seasoned weight. Great for noir mystery, philosophical commentary, and character roles.',
     accent: 'Gravelly Baritone English',
-    color: '#64748b', // slate
+    color: '#64748b',
     suggestedStyles: ['Noir detective monologue', 'Wise elderly scholar', 'Thoughtful investigative journalist'],
     previewSample: 'Some mysteries are best told in the shadows. Charon gives voice to timeless reflection.'
   },
@@ -94,19 +94,19 @@ const PREBUILT_VOICES = [
     tone: 'Melodic, Poetic & Expressive',
     description: 'Lyrical, vibrant, and elegant. Beautiful for poetry, luxury brand showcases, cheerful prompts, and theatrical dialogue.',
     accent: 'Melodic English',
-    color: '#10b981', // emerald
+    color: '#10b981',
     suggestedStyles: ['Lyrical poetic reciter', 'Charming luxury brand speaker', 'Enthusiastic theater actor'],
     previewSample: 'Words carry harmony and inspiration. Aoede crafts each phrase with artistic nuance.'
   }
 ];
 
 // Endpoint: list voices catalog
-app.get('/api/voices', (_req: Request, res: Response) => {
+app.get('/api/voices', (_req, res) => {
   res.json({ voices: PREBUILT_VOICES });
 });
 
 // Endpoint: Generate Speech (Unary WAV)
-app.post('/api/generate-speech', async (req: Request, res: Response) => {
+app.post('/api/generate-speech', async (req, res) => {
   try {
     const {
       text,
@@ -128,7 +128,7 @@ app.post('/api/generate-speech', async (req: Request, res: Response) => {
 
     const ai = getAiClient();
 
-    let audioBase64: string | null = null;
+    let audioBase64 = null;
     let mimeType = 'audio/wav';
 
     if (isDialogue) {
@@ -136,7 +136,7 @@ app.post('/api/generate-speech', async (req: Request, res: Response) => {
       const speaker1 = speakersConfig[0] || { speaker: 'Speaker 1', voiceName: 'Puck' };
       const speaker2 = speakersConfig[1] || { speaker: 'Speaker 2', voiceName: 'Kore' };
 
-      const parts = dialogueTurns.map((turn: { speaker: string; text: string; style?: string }) => ({
+      const parts = dialogueTurns.map((turn) => ({
         text: `${turn.speaker}: ${turn.text}`,
         speechMetadata: {
           speaker: turn.speaker,
@@ -187,11 +187,10 @@ app.post('/api/generate-speech', async (req: Request, res: Response) => {
       }
     } else {
       // Single speaker mode
-      // Model defaults to gemini-3.8-flash-lite-tts (ultra-fast, free) or user selected
       const selectedModel = model === 'gemini-3.8-flash-tts' ? 'gemini-3.8-flash-tts' : 'gemini-3.8-flash-lite-tts';
       const cleanText = text.trim();
 
-      const partPayload: { text: string; speechMetadata?: { style: string } } = {
+      const partPayload = {
         text: cleanText
       };
 
@@ -237,7 +236,6 @@ app.post('/api/generate-speech', async (req: Request, res: Response) => {
       });
     }
 
-    // Return the complete WAV audio base64
     return res.json({
       audioBase64,
       mimeType,
@@ -246,7 +244,7 @@ app.post('/api/generate-speech', async (req: Request, res: Response) => {
       textLength: isDialogue ? dialogueTurns.length : text.length,
       createdAt: new Date().toISOString()
     });
-  } catch (err: unknown) {
+  } catch (err) {
     console.error('Error generating speech:', err);
     const message = err instanceof Error ? err.message : 'Unknown server error during audio generation.';
     return res.status(500).json({ error: message });
@@ -254,7 +252,7 @@ app.post('/api/generate-speech', async (req: Request, res: Response) => {
 });
 
 // Endpoint: AI Script Assistant & Prompt Enhancer (using free gemini-3.8-flash)
-app.post('/api/enhance-script', async (req: Request, res: Response) => {
+app.post('/api/enhance-script', async (req, res) => {
   try {
     const { action, text, context } = req.body;
     if (!text && action !== 'generate_fresh') {
@@ -288,8 +286,8 @@ Return ONLY the polished spoken text.`;
 
     const enhancedText = response.text?.trim() || text;
     return res.json({ enhancedText });
-  } catch (err: unknown) {
-    console.error('Error enhancing script:', err);
+  } catch (err) {
+    console.error('Enhancing script error:', err);
     const message = err instanceof Error ? err.message : 'Failed to enhance script.';
     return res.status(500).json({ error: message });
   }
@@ -306,7 +304,7 @@ const setupServer = async () => {
     app.use(vite.middlewares);
   } else {
     app.use(express.static(path.resolve(__dirname, 'dist')));
-    app.get('*', (_req: Request, res: Response) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
     });
   }

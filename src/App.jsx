@@ -6,48 +6,42 @@
 import { useState, useEffect, useRef, useId } from 'react';
 import { 
   Sparkles, 
-  Play, 
   Volume2, 
-  RotateCcw, 
   Wand2, 
   Languages, 
-  Copy, 
-  Check, 
   Trash2, 
   AlertCircle,
   FileText,
   Clock,
-  Layers,
   Info
 } from 'lucide-react';
 
-import { VoiceInfo, GeneratedClip, DialogueTurn } from './types/voice';
-import { VOICES, SCRIPT_PRESETS } from './constants/presets';
-import { Header } from './components/Header';
-import { AudioPlayer } from './components/AudioPlayer';
-import { VoiceSelector } from './components/VoiceSelector';
-import { StyleSelector } from './components/StyleSelector';
-import { DialogueEditor } from './components/DialogueEditor';
-import { HistoryDrawer } from './components/HistoryDrawer';
+import { VOICES, SCRIPT_PRESETS } from './constants/presets.js';
+import { Header } from './components/Header.jsx';
+import { AudioPlayer } from './components/AudioPlayer.jsx';
+import { VoiceSelector } from './components/VoiceSelector.jsx';
+import { StyleSelector } from './components/StyleSelector.jsx';
+import { DialogueEditor } from './components/DialogueEditor.jsx';
+import { HistoryDrawer } from './components/HistoryDrawer.jsx';
 
 const STORAGE_KEY = 'gemini_voice_studio_clips';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'single' | 'dialogue'>('single');
-  const [voices, setVoices] = useState<VoiceInfo[]>(VOICES);
-  const [selectedVoice, setSelectedVoice] = useState<string>('Kore');
-  const [selectedModel, setSelectedModel] = useState<string>('gemini-3.8-flash-lite-tts');
-  const [style, setStyle] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('single');
+  const [voices] = useState(VOICES);
+  const [selectedVoice, setSelectedVoice] = useState('Kore');
+  const [selectedModel, setSelectedModel] = useState('gemini-3.8-flash-lite-tts');
+  const [style, setStyle] = useState('');
   
   // Script text
-  const [text, setText] = useState<string>(
+  const [text, setText] = useState(
     'Welcome to Gemini Voice Studio. Whatever words you write here, I will speak with natural clarity, human expression, and studio-quality audio.'
   );
 
   // Dual Dialogue state
   const [speaker1Voice, setSpeaker1Voice] = useState('Puck');
   const [speaker2Voice, setSpeaker2Voice] = useState('Kore');
-  const [dialogueTurns, setDialogueTurns] = useState<DialogueTurn[]>([
+  const [dialogueTurns, setDialogueTurns] = useState([
     {
       id: '1',
       speaker: 'Alex',
@@ -70,13 +64,13 @@ export default function App() {
 
   // Audio generation state
   const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentClip, setCurrentClip] = useState<GeneratedClip | null>(null);
-  const [historyClips, setHistoryClips] = useState<GeneratedClip[]>([]);
-  const [enhancingAction, setEnhancingAction] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const [currentClip, setCurrentClip] = useState(null);
+  const [historyClips, setHistoryClips] = useState([]);
+  const [enhancingAction, setEnhancingAction] = useState(null);
 
-  // In-memory cache for preview audio clips to prevent re-fetching
-  const previewCache = useRef<Record<string, string>>({});
+  // In-memory cache for preview audio clips
+  const previewCache = useRef({});
 
   // Load history from localStorage
   useEffect(() => {
@@ -97,7 +91,7 @@ export default function App() {
   }, []);
 
   // Save history to localStorage
-  const saveClips = (clips: GeneratedClip[]) => {
+  const saveClips = (clips) => {
     setHistoryClips(clips);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(clips.slice(0, 30)));
@@ -109,7 +103,6 @@ export default function App() {
   // Compute text statistics
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const charCount = text.length;
-  // Average speaking rate: ~140 words per minute (~2.3 words/sec)
   const estimatedSeconds = Math.max(1, Math.round(wordCount / 2.3));
 
   // Handle Speech Generation
@@ -160,7 +153,7 @@ export default function App() {
         throw new Error(data.error || 'Failed to synthesize voice audio.');
       }
 
-      const newClip: GeneratedClip = {
+      const newClip = {
         id: Math.random().toString(36).substring(2, 9),
         text: activeTab === 'single' 
           ? text.trim() 
@@ -176,7 +169,7 @@ export default function App() {
 
       setCurrentClip(newClip);
       saveClips([newClip, ...historyClips]);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Speech generation error:', err);
       const msg = err instanceof Error ? err.message : 'Error generating speech audio.';
       setError(msg);
@@ -186,7 +179,7 @@ export default function App() {
   };
 
   // Preview voice sample handler
-  const handlePreviewVoice = async (voiceId: string, sampleText: string): Promise<string | null> => {
+  const handlePreviewVoice = async (voiceId, sampleText) => {
     if (previewCache.current[voiceId]) {
       return previewCache.current[voiceId];
     }
@@ -217,7 +210,7 @@ export default function App() {
   };
 
   // Enhance / Polish Script with Gemini
-  const handleEnhanceScript = async (action: 'polish' | 'translate' | 'add_emotions', context?: string) => {
+  const handleEnhanceScript = async (action, context) => {
     if (!text.trim()) return;
     setEnhancingAction(action);
     setError(null);
@@ -239,7 +232,7 @@ export default function App() {
   };
 
   // Apply preset script
-  const applyPreset = (preset: typeof SCRIPT_PRESETS[0]) => {
+  const applyPreset = (preset) => {
     setText(preset.text);
     setSelectedVoice(preset.voice);
     setStyle(preset.style);
@@ -253,7 +246,6 @@ export default function App() {
       <Header activeTab={activeTab} onSelectTab={setActiveTab} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Error notification banner */}
         {error && (
           <div className="bg-rose-950/80 border border-rose-500/50 rounded-2xl p-4 flex items-start justify-between gap-3 text-rose-200 text-sm shadow-lg animate-in fade-in">
             <div className="flex items-start gap-2.5">
@@ -272,18 +264,12 @@ export default function App() {
           </div>
         )}
 
-        {/* Top Active Audio Player Banner */}
         <section aria-label="Audio Playback">
           <AudioPlayer clip={currentClip} />
         </section>
 
-        {/* Main Work Area: 2 Columns on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* Left Column: Words & Script Input (7 cols) */}
           <div className="lg:col-span-7 space-y-5">
-            
-            {/* Quick Inspiration Presets Chips */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-slate-400">
                 <span className="font-medium flex items-center gap-1.5">
@@ -307,7 +293,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Script Input Box or Dialogue Mode */}
             {activeTab === 'single' ? (
               <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
                 <div className="flex items-center justify-between">
@@ -318,7 +303,6 @@ export default function App() {
                     </label>
                   </div>
                   
-                  {/* Script Assistant Tools */}
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
@@ -355,7 +339,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Textarea */}
                 <div className="relative">
                   <textarea
                     id={spokenTextareaId}
@@ -367,7 +350,6 @@ export default function App() {
                   />
                 </div>
 
-                {/* Word & Duration statistics footer */}
                 <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-1">
                   <div className="flex items-center gap-3">
                     <span className="font-mono">{wordCount} words</span>
@@ -386,7 +368,6 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              /* Dialogue Mode */
               <DialogueEditor
                 dialogueTurns={dialogueTurns}
                 onChangeTurns={setDialogueTurns}
@@ -398,7 +379,6 @@ export default function App() {
               />
             )}
 
-            {/* Voice Emotion / Style Customizer */}
             {activeTab === 'single' && (
               <StyleSelector
                 style={style}
@@ -408,7 +388,6 @@ export default function App() {
               />
             )}
 
-            {/* Main Generate Audio Button */}
             <div className="pt-2">
               <button
                 type="button"
@@ -434,9 +413,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Column: Voice Selection Grid & History Drawer (5 cols) */}
           <div className="lg:col-span-5 space-y-5">
-            {/* Solo Voice Selection */}
             {activeTab === 'single' && (
               <VoiceSelector
                 voices={voices}
@@ -447,7 +424,6 @@ export default function App() {
               />
             )}
 
-            {/* History / Saved Clips Drawer */}
             <HistoryDrawer
               clips={historyClips}
               onSelectClip={(c) => setCurrentClip(c)}
@@ -456,7 +432,6 @@ export default function App() {
               currentClipId={currentClip?.id}
             />
 
-            {/* Feature Guide Info Card */}
             <div className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 text-xs text-slate-400 space-y-2">
               <div className="flex items-center gap-2 text-slate-300 font-semibold">
                 <Info className="w-4 h-4 text-indigo-400" />
@@ -469,12 +444,10 @@ export default function App() {
                 <li><strong className="text-slate-300">Unlimited Words:</strong> Type any sentence, paragraph, script, or dialogue.</li>
               </ul>
             </div>
-
           </div>
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-slate-800/60 py-4 px-6 text-center text-xs text-slate-500">
         <p>Gemini Voice Studio • High Fidelity Speech Generation powered by Google Gemini Audio Models</p>
       </footer>

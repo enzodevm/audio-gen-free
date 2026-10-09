@@ -13,14 +13,8 @@ import {
   Sparkles,
   Music
 } from 'lucide-react';
-import { GeneratedClip } from '../types/voice';
 
-interface AudioPlayerProps {
-  clip: GeneratedClip | null;
-  onDownload?: () => void;
-}
-
-export function AudioPlayer({ clip }: AudioPlayerProps) {
+export function AudioPlayer({ clip }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -30,9 +24,9 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
   const [isLooping, setIsLooping] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animFrameRef = useRef<number | null>(null);
+  const audioRef = useRef(null);
+  const canvasRef = useRef(null);
+  const animFrameRef = useRef(null);
 
   // Re-initialize when clip changes
   useEffect(() => {
@@ -74,7 +68,6 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
     audio.play().then(() => {
       setIsPlaying(true);
     }).catch(() => {
-      // Autoplay policy might block without interaction, user can click play
       setIsPlaying(false);
     });
 
@@ -116,14 +109,14 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
     }
   };
 
-  const skipSeconds = (seconds: number) => {
+  const skipSeconds = (seconds) => {
     if (!audioRef.current) return;
     const nextTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds));
     audioRef.current.currentTime = nextTime;
     setCurrentTime(nextTime);
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeek = (e) => {
     const val = parseFloat(e.target.value);
     if (audioRef.current) {
       audioRef.current.currentTime = val;
@@ -175,14 +168,12 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
         const barProgress = i / numBars;
         const isPassed = barProgress <= progress;
 
-        // Dynamic frequency-like wave height
         let barHeight = 0;
         if (isPlaying) {
           const wave1 = Math.sin((i * 0.3) + (frame * 0.08)) * 0.5 + 0.5;
           const wave2 = Math.cos((i * 0.5) - (frame * 0.05)) * 0.5 + 0.5;
           barHeight = 10 + (wave1 * 0.6 + wave2 * 0.4) * (height - 18);
         } else {
-          // Static resting waveform pattern
           const pseudoFreq = (Math.sin(i * 0.45) * 0.5 + 0.5) * (Math.cos(i * 0.2) * 0.5 + 0.5);
           barHeight = 8 + pseudoFreq * (height - 24);
         }
@@ -191,13 +182,12 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
         const y = (height - barHeight) / 2;
 
         if (isPassed) {
-          // Active / played color gradient
           const grad = ctx.createLinearGradient(0, y, 0, y + barHeight);
-          grad.addColorStop(0, '#a855f7'); // purple
-          grad.addColorStop(1, '#3b82f6'); // blue
+          grad.addColorStop(0, '#a855f7');
+          grad.addColorStop(1, '#3b82f6');
           ctx.fillStyle = grad;
         } else {
-          ctx.fillStyle = '#334155'; // muted slate
+          ctx.fillStyle = '#334155';
         }
 
         ctx.beginPath();
@@ -215,7 +205,7 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
     };
   }, [isPlaying, currentTime, duration]);
 
-  const formatTime = (secs: number) => {
+  const formatTime = (secs) => {
     if (isNaN(secs)) return '0:00';
     const m = Math.floor(secs / 60);
     const s = Math.floor(secs % 60);
@@ -241,7 +231,6 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
 
   return (
     <div className="bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800/80 rounded-2xl p-5 shadow-2xl backdrop-blur-md">
-      {/* Clip details header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
@@ -273,12 +262,10 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
         </div>
       </div>
 
-      {/* Quoted spoken text preview */}
       <div className="mb-4 bg-slate-950/60 border border-slate-800/60 rounded-xl p-3 text-sm text-slate-200 line-clamp-2 italic leading-relaxed">
         "{clip.text}"
       </div>
 
-      {/* Visualizer Canvas */}
       <div className="relative mb-3 bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5 overflow-hidden">
         <canvas
           ref={canvasRef}
@@ -294,7 +281,6 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
         </div>
       </div>
 
-      {/* Scrubber Progress Bar */}
       <div className="mb-4">
         <label htmlFor={seekSliderId} className="sr-only">Seek Audio</label>
         <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1 px-1">
@@ -313,9 +299,7 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
         />
       </div>
 
-      {/* Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 pt-1 border-t border-slate-800/60">
-        {/* Playback Controls */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => skipSeconds(-5)}
@@ -352,7 +336,6 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
           </button>
         </div>
 
-        {/* Speed toggle chips */}
         <div className="flex items-center gap-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800">
           {[0.75, 1, 1.25, 1.5, 2].map(rate => (
             <button
@@ -369,7 +352,6 @@ export function AudioPlayer({ clip }: AudioPlayerProps) {
           ))}
         </div>
 
-        {/* Volume & Mute */}
         <div className="flex items-center gap-2">
           <label htmlFor={volumeSliderId} className="sr-only">Volume</label>
           <button

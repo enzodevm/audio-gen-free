@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import { History, Play, Trash2, Download, Search, X, Volume2 } from 'lucide-react';
-import { GeneratedClip } from '../types/voice';
-
-interface HistoryDrawerProps {
-  clips: GeneratedClip[];
-  onSelectClip: (clip: GeneratedClip) => void;
-  onDeleteClip: (id: string) => void;
-  onClearAll: () => void;
-  currentClipId?: string;
-}
+import { History, Trash2, Download, Search, X } from 'lucide-react';
 
 export function HistoryDrawer({
   clips,
@@ -16,7 +7,7 @@ export function HistoryDrawer({
   onDeleteClip,
   onClearAll,
   currentClipId
-}: HistoryDrawerProps) {
+}) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredClips = clips.filter((c) =>
@@ -25,7 +16,7 @@ export function HistoryDrawer({
     (c.style && c.style.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const downloadClip = (clip: GeneratedClip, e: React.MouseEvent) => {
+  const downloadClip = (clip, e) => {
     e.stopPropagation();
     const link = document.createElement('a');
     link.href = `data:${clip.mimeType || 'audio/wav'};base64,${clip.audioBase64}`;
@@ -36,7 +27,7 @@ export function HistoryDrawer({
     document.body.removeChild(link);
   };
 
-  const formatTimestamp = (iso: string) => {
+  const formatTimestamp = (iso) => {
     try {
       const d = new Date(iso);
       return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -47,7 +38,6 @@ export function HistoryDrawer({
 
   return (
     <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-3">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-indigo-400" />
@@ -70,7 +60,6 @@ export function HistoryDrawer({
         )}
       </div>
 
-      {/* Search Bar */}
       {clips.length > 3 && (
         <div className="relative">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -92,7 +81,6 @@ export function HistoryDrawer({
         </div>
       )}
 
-      {/* List */}
       <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
         {filteredClips.length === 0 ? (
           <div className="text-center py-6 text-slate-500 text-xs">

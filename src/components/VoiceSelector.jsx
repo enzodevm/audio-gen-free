@@ -1,14 +1,5 @@
 import { useState, useRef } from 'react';
 import { Play, Pause, Sparkles, Check } from 'lucide-react';
-import { VoiceInfo } from '../types/voice';
-
-interface VoiceSelectorProps {
-  voices: VoiceInfo[];
-  selectedVoice: string;
-  onSelectVoice: (voiceId: string) => void;
-  onSelectSuggestedStyle?: (style: string) => void;
-  onPreviewVoice?: (voiceId: string, sampleText: string) => Promise<string | null>;
-}
 
 export function VoiceSelector({
   voices,
@@ -16,12 +7,12 @@ export function VoiceSelector({
   onSelectVoice,
   onSelectSuggestedStyle,
   onPreviewVoice
-}: VoiceSelectorProps) {
-  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
-  const [previewLoadingId, setPreviewLoadingId] = useState<string | null>(null);
-  const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
+}) {
+  const [playingVoiceId, setPlayingVoiceId] = useState(null);
+  const [previewLoadingId, setPreviewLoadingId] = useState(null);
+  const audioPreviewRef = useRef(null);
 
-  const handleTogglePreview = async (voice: VoiceInfo, e: React.MouseEvent) => {
+  const handleTogglePreview = async (voice, e) => {
     e.stopPropagation();
 
     if (playingVoiceId === voice.id && audioPreviewRef.current) {
@@ -88,7 +79,6 @@ export function VoiceSelector({
                   : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700/80'
               }`}
             >
-              {/* Header: avatar + name + preview play */}
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2.5">
                   <div
@@ -114,7 +104,6 @@ export function VoiceSelector({
                   </div>
                 </div>
 
-                {/* Preview sample button */}
                 <button
                   type="button"
                   onClick={(e) => handleTogglePreview(voice, e)}
@@ -139,7 +128,6 @@ export function VoiceSelector({
                 </button>
               </div>
 
-              {/* Tone & Description */}
               <div className="mb-2.5">
                 <p className="text-xs font-semibold text-slate-300 mb-0.5">
                   {voice.tone}
@@ -149,7 +137,6 @@ export function VoiceSelector({
                 </p>
               </div>
 
-              {/* Quick style tags */}
               {voice.suggestedStyles && voice.suggestedStyles.length > 0 && (
                 <div className="pt-2 border-t border-slate-800/80 flex flex-wrap gap-1">
                   {voice.suggestedStyles.slice(0, 2).map((s, idx) => (

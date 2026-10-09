@@ -1,6 +1,4 @@
-import { ScriptPreset, VoiceInfo } from '../types/voice';
-
-export const VOICES: VoiceInfo[] = [
+export const VOICES = [
   {
     id: 'Kore',
     name: 'Kore',
@@ -80,7 +78,7 @@ export const STYLE_PRESETS = [
   { label: '☕ Cozy Podcast', value: 'Intimate, relaxed, friendly late-night coffee shop conversation' }
 ];
 
-export const SCRIPT_PRESETS: ScriptPreset[] = [
+export const SCRIPT_PRESETS = [
   {
     id: 'trailer',
     title: 'Blockbuster Trailer',
