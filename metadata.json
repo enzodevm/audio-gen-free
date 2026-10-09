@@ -1,0 +1,6 @@
+{
+  "name": "Gemini Voice Studio",
+  "description": "Free AI Voice and Speech Generator powered by Gemini audio models. Customize voices, accents, emotion styles, and generate studio-quality WAV audio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
